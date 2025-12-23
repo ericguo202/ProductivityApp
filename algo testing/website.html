@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Project Match – Swipe to Collaborate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #f3f4ff, #e2e8f0);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #0f172a;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 960px;
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 800px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .logo {
+      font-weight: 800;
+      font-size: 1.3rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: conic-gradient(from 220deg, #6366f1, #22c55e, #ec4899, #6366f1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #f9fafb;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .header-sub {
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+
+    .card-wrapper {
+      position: relative;
+      min-height: 320px;
+    }
+
+    .card {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(145deg, #f9fafb, #eef2ff);
+      border-radius: 20px;
+      border: 1px solid #e2e8f0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .empty-state {
+      border-radius: 20px;
+      border: 1px dashed #cbd5f5;
+      padding: 32px;
+      text-align: center;
+      background: #f8fafc;
+      color: #64748b;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      min-height: 240px;
+    }
+
+    .name-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .age {
+      font-size: 0.95rem;
+      color: #64748b;
+    }
+
+    .location {
+      font-size: 0.9rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #ecfdf5;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .pill {
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .pill-ideas-yes {
+      background: #dcfce7;
+      color: #15803d;
+    }
+
+    .pill-ideas-no {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #94a3b8;
+      margin-top: 4px;
+    }
+
+    .about {
+      font-size: 0.9rem;
+      color: #0f172a;
+      line-height: 1.4;
+      background: rgba(255,255,255,0.7);
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid #e5e7eb;
+    }
+
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #3730a3;
+    }
+
+    .card-footer {
+      margin-top: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: #64748b;
+    }
+
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .btn {
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.12s ease;
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+      box-shadow: none;
+    }
+
+    .btn-skip {
+      background: #f3f4f6;
+      color: #374151;
+      box-shadow: 0 6px 12px rgba(148, 163, 184, 0.35);
+    }
+
+    .btn-like {
+      background: #4f46e5;
+      color: #e5e7eb;
+      box-shadow: 0 6px 14px rgba(79, 70, 229, 0.5);
+    }
+
+    .btn-skip span.icon {
+      font-size: 1.1rem;
+    }
+    .btn-like span.icon {
+      font-size: 1.1rem;
+    }
+
+    /* Sidebar / matches */
+    .sidebar {
+      border-radius: 18px;
+      border: 1px solid #e2e8f0;
+      background: #f8fafc;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sidebar h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .matches-list {
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+      font-size: 0.85rem;
+    }
+
+    .match-item {
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: white;
+      border: 1px solid #e5e7eb;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 6px;
+    }
+
+    .match-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .match-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .match-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 2px;
+    }
+
+    .match-tag {
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #eef2ff;
+      color: #4f46e5;
+      font-size: 0.7rem;
+    }
+
+    .muted {
+      color: #9ca3af;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- LEFT: swipe area -->
+    <div>
+      <div class="header">
+        <div class="logo">
+          <div class="logo-badge">PM</div>
+          Project Match
+        </div>
+        <div class="header-sub">
+          Swipe to find collaborators
+        </div>
+      </div>
+
+      <div class="card-wrapper" id="card-wrapper">
+        <!-- Card gets injected by JS -->
+      </div>
+
+      <div class="controls">
+        <button class="btn btn-skip" id="btn-skip">
+          <span class="icon">⟲</span>
+          Skip
+        </button>
+        <button class="btn btn-like" id="btn-like">
+          <span class="icon">⚡</span>
+          Connect
+        </button>
+      </div>
+    </div>
+
+    <!-- RIGHT: matches -->
+    <aside class="sidebar">
+      <h2>
+        Your Matches
+        <span class="muted" id="match-count">0</span>
+      </h2>
+      <div class="matches-list" id="matches"></div>
+      <p class="muted">
+        Matches are stored locally in this session only.
+      </p>
+    </aside>
+  </div>
+
+  <script>
+    // ---- Seed data ----
+    const profiles = [
+      {
+        name: "Alice Kim",
+        age: 24,
+        experience: "2 years full-stack SWE",
+        education: "B.S. Computer Science, MIT",
+        ideas: true,
+        about: "Building tools for climate analytics. Looking for someone strong in data viz + product.",
+        location: "New York, NY",
+        verified: true,
+        tags: ["Climate", "Data", "Web Apps"]
+      },
+      {
+        name: "Rahul Sharma",
+        age: null, // prefer not to say
+        experience: "5 years ML & infra",
+        education: "M.S. Machine Learning, CMU",
+        ideas: false,
+        about: "Happy to join existing ideas. I like reinforcement learning, trading systems, and infra.",
+        location: "Remote (UTC-5)",
+        verified: false,
+        tags: ["ML", "Infra", "Trading"]
+      },
+      {
+        name: "Sara Lopez",
+        age: 29,
+        experience: "Senior UX / Product Designer",
+        education: "B.A. Design, RISD",
+        ideas: true,
+        about: "Idea for a marketplace that matches students to research projects. Need engineering partners.",
+        location: "Austin, TX",
+        verified: true,
+        tags: ["Design", "EdTech", "Marketplace"]
+      },
+      {
+        name: "Michael Chen",
+        age: 21,
+        experience: "Student, robotics + backend",
+        education: "B.S. MechE & CS, UC Berkeley",
+        ideas: false,
+        about: "Love robotics, controls, and dev tools. Looking to join a serious side project.",
+        location: "Bay Area, CA",
+        verified: false,
+        tags: ["Robotics", "Dev Tools"]
+      },
+      {
+        name: "Fatima Al-Hassan",
+        age: 27,
+        experience: "3 years data scientist",
+        education: "M.S. Statistics, ETH Zürich",
+        ideas: true,
+        about: "Thinking about mental health analytics & recommendation systems. Open to brainstorm.",
+        location: "Berlin, DE",
+        verified: true,
+        tags: ["Health", "Recommenders", "Data"]
+      }
+    ];
+
+    let currentIndex = 0;
+    const matches = [];
+
+    const cardWrapper = document.getElementById("card-wrapper");
+    const matchesEl = document.getElementById("matches");
+    const matchCountEl = document.getElementById("match-count");
+    const btnSkip = document.getElementById("btn-skip");
+    const btnLike = document.getElementById("btn-like");
+
+    function formatAge(age) {
+      if (age === null || age === undefined) return "Prefer not to say";
+      return age + " yrs";
+    }
+
+    function renderCard() {
+      cardWrapper.innerHTML = "";
+
+      if (currentIndex >= profiles.length) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.innerHTML = `
+          <strong>You're all caught up 🎉</strong>
+          <span>No more profiles in this batch. Add more people in the data or hook this up to a backend later.</span>
+        `;
+        cardWrapper.appendChild(empty);
+        return;
+      }
+
+      const p = profiles[currentIndex];
+
+      const card = document.createElement("div");
+      card.className = "card";
+
+      card.innerHTML = `
+        <div class="name-row">
+          <div>
+            <div class="name">
+              <span>${p.name}</span>
+              <span class="age">${formatAge(p.age)}</span>
+            </div>
+            <div class="location">
+              <span>📍</span>
+              <span>${p.location}</span>
+            </div>
+          </div>
+          <div>
+            ${
+              p.verified
+                ? `<div class="verified">✓ Verified</div>`
+                : `<div class="muted" style="font-size:0.75rem;">Not verified</div>`
+            }
+          </div>
+        </div>
+
+        <div class="pill-row">
+          <span class="pill">${p.experience}</span>
+          <span class="pill">${p.education}</span>
+          ${
+            p.ideas
+              ? `<span class="pill pill-ideas-yes">Has project ideas</span>`
+              : `<span class="pill pill-ideas-no">Looking to join ideas</span>`
+          }
+        </div>
+
+        <div>
+          <div class="section-title">About</div>
+          <p class="about">${p.about}</p>
+        </div>
+
+        <div>
+          <div class="section-title">Interests</div>
+          <div class="tags-row">
+            ${p.tags.map(tag => `<span class="tag">${tag}</span>`).join("")}
+          </div>
+        </div>
+
+        <div class="card-footer">
+          <span>Profile ${currentIndex + 1} of ${profiles.length}</span>
+          <span class="muted">Swipe-style: Skip or Connect</span>
+        </div>
+      `;
+
+      cardWrapper.appendChild(card);
+    }
+
+    function renderMatches() {
+      matchesEl.innerHTML = "";
+      matchCountEl.textContent = matches.length.toString();
+
+      if (!matches.length) {
+        matchesEl.innerHTML = `<div class="muted">No matches yet. Tap “Connect” on people you’d like to work with.</div>`;
+        return;
+      }
+
+      matches.forEach(m => {
+        const div = document.createElement("div");
+        div.className = "match-item";
+        div.innerHTML = `
+          <div class="match-header">
+            <div class="match-name">${m.name}</div>
+            <div class="muted" style="font-size:0.75rem;">${m.location}</div>
+          </div>
+          <div class="muted">${m.experience}</div>
+          <div class="match-tags">
+            ${m.tags.slice(0,3).map(t => `<span class="match-tag">${t}</span>`).join("")}
+          </div>
+        `;
+        matchesEl.appendChild(div);
+      });
+    }
+
+    function nextProfile() {
+      currentIndex++;
+      renderCard();
+    }
+
+    btnSkip.addEventListener("click", () => {
+      nextProfile();
+    });
+
+    btnLike.addEventListener("click", () => {
+      if (currentIndex < profiles.length) {
+        matches.push(profiles[currentIndex]);
+        renderMatches();
+      }
+      nextProfile();
+    });
+
+    // Initial render
+    renderCard();
+    renderMatches();
+  </script>
+</body>
+</html>

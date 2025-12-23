@@ -1,0 +1,26 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
+@import "tailwindcss";
+
+body {
+  @apply antialiased;
+}
+.hero-word {
+  display: inline-block;
+  animation: drop-in 0.55s ease-out;
+}
+
+@keyframes drop-in {
+  0% {
+    transform: translateY(-60%);
+    opacity: 0;
+    filter: blur(3px);
+  }
+  60% {
+    transform: translateY(8%);
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
